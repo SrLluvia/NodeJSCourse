@@ -1,22 +1,9 @@
-//require = import in nodejs
-const http = require('http');
 const fs = require('fs');
 
-/*
-//req = request
-//res = response
-function rqListener(req, res){
+const requestHandler = (req, res) => {
+    const url = req.url;    
+    const method = req.method
 
-}
-
-//rqListener will execute for every incoming request
-http.createServer(rqListener);
-*/
-
-//With anonymous function
-const server = http.createServer((req, res) => {
-    const url = req.url;
-    const method = req.method;
     if(url === '/'){
         res.write('<html>');
         res.write('<head><title>Enter info</title></head>');
@@ -25,7 +12,7 @@ const server = http.createServer((req, res) => {
         //Not required to return a res, but to not continue with the code
         return res.end();
     }
-
+    
     //Has to match previous res
     if(url === '/info' && method === 'POST'){
         const body = [];
@@ -34,18 +21,20 @@ const server = http.createServer((req, res) => {
             body.push(chunk);
         });
         //when the is no more data to read
-        req.on('end', () => {
+        return req.on('end', () => {
             //add all the chunks
             const parsedBody = Buffer.concat(body).toString();
             const info = parsedBody.split('=')[1];
-            fs.writeFileSync('info.txt', info);
+            fs.writeFile('info.txt', info, (err) => {
+                //302 = redirection
+                res.statusCode = 302;
+                res.setHeader('Location', '/');
+                return res.end();
+            });
         });
-        //302 = redirection
-        res.statusCode = 302;
-        res.setHeader('Location', '/');
-        return res.end();
+        
     }
-
+    
     //Attach header to res with metadata info 
     res.setHeader('Content-Type', 'text/html');
     res.write('<html>');
@@ -54,8 +43,9 @@ const server = http.createServer((req, res) => {
     res.write('</html>');
     res.end();
     //process.exit();
-});
+}
 
-//Starts a process where nodejs will keep running listening for incoming requests
-//listen(port, hostname)
-server.listen(3000);
+//Global object
+exports = requestHandler;
+
+
