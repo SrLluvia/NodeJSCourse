@@ -46,6 +46,6 @@ const requestHandler = (req, res) => {
 }
 
 //Global object
-exports = requestHandler;
+module.exports = requestHandler;
 
 
