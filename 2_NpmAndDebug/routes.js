@@ -7,7 +7,7 @@ const requestHandler = (req, res) => {
     if(url === '/'){
         res.write('<html>');
         res.write('<head><title>Enter info</title></head>');
-        res.write('<body><form action="/info" method="POST"><input type="text" name="info"><button type="submit">Send!</button></body>');
+        res.write('<body><h1>Restart?</h1><form action="/info" method="POST"><input type="text" name="info"><button type="submit">Send!</button></body>');
         res.write('</html>');
         //Not required to return a res, but to not continue with the code
         return res.end();
