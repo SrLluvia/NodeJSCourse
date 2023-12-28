@@ -1,11 +1,17 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const expressHbs = require('express-handlebars');
 
 //Creates express app
 const app = express();
 //Allows to set any values globally
-app.set('view engine', 'pug');
+app.engine('hbs', 
+    expressHbs({
+        layoutsDir: 'views/layouts/',
+        defaultLayout: 'main-layout', 
+        extname: 'hbs'}));
+app.set('view engine', 'hbs');
 //Default
 app.set('views', 'views');
 //Allows to parse body
@@ -20,7 +26,7 @@ app.use(adminData.routes);
 app.use(shopRoutes);
 
 app.use((req, res, next) => {
-    res.status(404).render('404', {pageTitle: '404 - Page not found'});
+    res.status(404).render('404', {pageTitle: '404 - Page not found HBS'});
 });
 
 //Add middleware function, executed for every incoming request
