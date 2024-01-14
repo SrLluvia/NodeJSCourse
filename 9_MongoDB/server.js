@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const errorController = require('./controllers/error');
-const mongoConnect = require('./util/database');
+const mongoConnect = require('./util/database').mongoConnect;
 
 //Creates express app
 const app = express();
@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const adminRoutes = require('./routes/admin');
-//const shopRoutes = require('./routes/shop');
+const shopRoutes = require('./routes/shop');
 
 //Run on incoming requests
 app.use((req, res, next) => {
@@ -28,14 +28,14 @@ app.use((req, res, next) => {
         next();
     })
     .catch(err => console.log(err));*/
+    next();
 });
 
 app.use('/admin', adminRoutes);
-//app.use(shopRoutes);
+app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-mongoConnect((client) => {
-    console.log(client);
+mongoConnect(() => {
     app.listen(6006);
 })
