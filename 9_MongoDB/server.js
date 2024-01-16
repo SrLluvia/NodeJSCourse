@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const errorController = require('./controllers/error');
 const mongoConnect = require('./util/database').mongoConnect;
+const User = require('./models/user');
 
 //Creates express app
 const app = express();
@@ -20,15 +21,13 @@ const shopRoutes = require('./routes/shop');
 
 //Run on incoming requests
 app.use((req, res, next) => {
-    /*
-    User.findByPk(1)
+    User.findById('65a6302bccf005499bd4381d')
     .then(user => {
         //Adds a new field to the request
-        req.user = user;
+        req.user = new User(user.name, user.email, user.cart, user._id);
         next();
     })
-    .catch(err => console.log(err));*/
-    next();
+    .catch(err => console.log(err));
 });
 
 app.use('/admin', adminRoutes);
