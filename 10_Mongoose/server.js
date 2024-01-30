@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const mongoose = require('mongoose');
 const errorController = require('./controllers/error');
-const User = require('./models/user');
+//const User = require('./models/user');
 
 //Creates express app
 const app = express();
@@ -20,6 +20,7 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
 //Run on incoming requests
+/*
 app.use((req, res, next) => {
     User.findById('65a6302bccf005499bd4381d')
     .then(user => {
@@ -28,14 +29,14 @@ app.use((req, res, next) => {
         next();
     })
     .catch(err => console.log(err));
-});
+});*/
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-mongoose.connect('mongodb+srv://admin:admin@cluster0.j8rsx4b.mongodb.net/').then(result => {
+mongoose.connect('mongodb+srv://admin:admin@cluster0.j8rsx4b.mongodb.net/shop').then(result => {
     app.listen(6006);
 }).catch(err => {
     console.log(err);
