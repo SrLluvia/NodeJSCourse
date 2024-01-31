@@ -14,7 +14,14 @@ exports.postAddProduct = (req, res, next) => {
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
-    const product = new Product({title: title, price: price, description: description, imageUrl: imageUrl});
+    const product = new Product({
+        title: title, 
+        price: price, 
+        description: description, 
+        imageUrl: imageUrl,
+        //Mongoose take the _id
+        userId: req.user
+    });
     product.save()
     .then(result => {
         //console.log(result);
@@ -70,7 +77,12 @@ exports.postEditProduct = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
-    Product.find().then(products => {
+    Product.find()
+    //Get the specified fields
+    //.select('title price -_id')
+    //Get all the info with that userId
+    //.populate('userId', 'name')
+    .then(products => {
         res.render('admin/products', {
             prods: products,
             pageTitle: 'Admin products',

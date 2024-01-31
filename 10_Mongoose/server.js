@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const mongoose = require('mongoose');
 const errorController = require('./controllers/error');
-//const User = require('./models/user');
+const User = require('./models/user');
 
 //Creates express app
 const app = express();
@@ -20,23 +20,35 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
 //Run on incoming requests
-/*
 app.use((req, res, next) => {
-    User.findById('65a6302bccf005499bd4381d')
+    User.findById('65ba99421772a1fa8499afcf')
     .then(user => {
         //Adds a new field to the request
-        req.user = new User(user.name, user.email, user.cart, user._id);
+        req.user = user;
         next();
     })
     .catch(err => console.log(err));
-});*/
+});
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-mongoose.connect('mongodb+srv://admin:admin@cluster0.j8rsx4b.mongodb.net/shop').then(result => {
+mongoose.connect('mongodb+srv://admin:admin@cluster0.j8rsx4b.mongodb.net/shop')
+.then(result => {
+    User.findOne().then(user => {
+        if(!user){
+            const user = new User({
+                name: 'Lander',
+                email: 'email@email.com',
+                cart: {
+                    items: []
+                }
+            });
+            user.save();
+        }
+    });
     app.listen(6006);
 }).catch(err => {
     console.log(err);
