@@ -97,13 +97,13 @@ exports.getSignup = (req, res, next) => {
             })
             .then(result => {
                 res.redirect('/login');
+                /*
                 return transporter.sendMail({
                     to: email,
-                    //Need a valid email sender
                     from: 'test@test.com',
                     subject: 'Signup suceeded!',
                     html: '<h1>You sucessfully signed up!</h1>'
-                });
+                });*/
             })
             .catch(err => {
                 console.log(err)
