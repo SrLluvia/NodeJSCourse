@@ -60,16 +60,20 @@ exports.postEditProduct = (req, res, next) => {
     const updatedPrice = req.body.price;
     const updatedImageUrl = req.body.imageUrl;
     const updateDescription = req.body.description;
-    Product.findById(productId).then(product => {
+    Product.findById(productId)
+    .then(product => {
+        if(product.userId.toString() !== req.user._id.toString()){
+            return res.redirect('/');
+        }
         product.title = updatedTitle;
         product.price = updatedPrice;
         product.imageUrl = updatedImageUrl;
         product.description = updateDescription;
-        return product.save();
-    })
-    .then(result => {
-        console.log('Updated product');
-        res.redirect('/admin/products');
+        return product.save()
+        .then(result => {
+            console.log('Updated product');
+            res.redirect('/admin/products');
+        });
     })
     //Catch errors from both promises: findByPk() and save()
     .catch(err => console.log(err));
@@ -77,11 +81,8 @@ exports.postEditProduct = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
-    Product.find()
-    //Get the specified fields
-    //.select('title price -_id')
-    //Get all the info with that userId
-    //.populate('userId', 'name')
+    //Find products created by the logged user
+    Product.find({userId: req.user._id})
     .then(products => {
         res.render('admin/products', {
             prods: products,
@@ -93,7 +94,7 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
     const productId = req.body.productId;
-    Product.findByIdAndDelete(productId)
+    Product.deleteOne({_id: productId, userId: req.user._id})
     .then(result => {
         console.log('Deleted product');
         res.redirect('/admin/products');
