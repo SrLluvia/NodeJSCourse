@@ -1,16 +1,43 @@
 const express = require('express');
+//Subpackage
+const { check, body } = require('express-validator');
 
 const authController = require('../controllers/auth');
+const User = require('../models/user');
 
 const router = express.Router();
 
 router.get('/login', authController.getLogin);
-router.post('/login', authController.postLogin);
+router.post('/login',
+    [
+        body('email').isEmail().withMessage('Please enter a valid email'),
+        body('password').isLength({min: 5}).isAlphanumeric()
+    ],
+     authController.postLogin);
 
 router.post('/logout', authController.postLogout);
 
 router.get('/signup', authController.getSignup);
-router.post('/signup', authController.postSignup);
+router.post('/signup', 
+    [
+        check('email').isEmail().withMessage('Please enter a valid email')
+        .custom((value, {req}) => {
+            return User.findOne({email: value})
+            .then(userDoc => {
+                if(userDoc){
+                    return new Promise.reject('Email exists already, please pick a different one');
+                }
+            });
+        }),
+        body('password').isLength({min: 5}).isAlphanumeric(),
+        body('confirmPassword').custom((value, {req}) => {
+            if (value !== req.body.password){
+                throw new Error('Passwords have to match');
+            }
+            return true;
+        })
+    ],
+    authController.postSignup);
 
 router.get('/reset', authController.getReset);
 router.post('/reset', authController.postReset);

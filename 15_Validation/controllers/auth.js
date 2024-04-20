@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport');
 const bcrypt = require('bcryptjs');
+const { validationResult } = require('express-validator');
 
 //sendgrid returns a config. that nodemailer can use 
 const transporter = nodemailer.createTransport(sendgridTransport({
@@ -30,6 +31,14 @@ exports.getLogin = (req, res, next) => {
 exports.postLogin = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.render('auth/login', {
+            path: '/login',
+            pageTitle: 'Login',
+            errorMessage: errors.array()[0].msg
+        });
+    }
     User.findOne({email: email})
     .then(user => {
         if(!user){
@@ -79,16 +88,18 @@ exports.getSignup = (req, res, next) => {
 };
 
 exports.postSignup = (req, res, next) => {
-const email = req.body.email;
-const password = req.body.password;
-const confirmPassword = req.body.confirmPassword;
-User.findOne({email: email})
-    .then(userDoc => {
-        if(userDoc){
-            req.flash('error', 'Email already exists');
-            return res.redirect('/signup');
-        }
-        return bcrypt.hash(password, 12)
+    const email = req.body.email;
+    const password = req.body.password;
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        //422 = validation failed
+        return res.status(422).render('auth/signup', {
+            path: '/signup',
+            pageTitle: 'Signup',
+            errorMessage: errors.array()[0].msg
+        });
+    }
+    bcrypt.hash(password, 12)
         .then(hashedPassword => {
             const user = new User({
                 email: email,
@@ -111,10 +122,6 @@ User.findOne({email: email})
         .catch(err => {
             console.log(err)
         });
-    })
-    .catch(err => {
-        console.log(err)
-    });
 };
 
 exports.getReset = (req, res, next) => {
