@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const feedRoutes = require('./routes/feed');
 
@@ -13,12 +14,16 @@ app.use(bodyParser.json());
 app.use((req, res, next) => {
     //Allow access to any client
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methos', 'GET, POST, PUT, PATCH, DELETE');
-    res.setHeader('Acces-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 })
 
 //Forward requests that start with /feed
 app.use('/feed', feedRoutes);
 
-app.listen(8080);
+mongoose.connect(
+    'mongodb+srv://admin:admin@cluster0.j8rsx4b.mongodb.net/backendjscourse'
+).then( result => {
+    app.listen(8080);
+}).catch(err => console.log(err));
