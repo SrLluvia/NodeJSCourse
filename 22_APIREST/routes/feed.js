@@ -21,6 +21,15 @@ router.post(
     feedController.postPost
 );
 
+router.put('/post/:postId',
+    [
+        //Middleware to validate fields
+        body('title').trim().isLength({min: 5}),
+        body('content').trim().isLength({min: 5})
+    ],
+    feedController.updatePost
+);
 
+router.delete('/post/:postId', feedController.deletePost);
 
 module.exports = router;
