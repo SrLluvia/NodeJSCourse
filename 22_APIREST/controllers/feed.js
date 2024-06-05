@@ -1,42 +1,85 @@
 const {validationResult} = require('express-validator');
+const Post = require('../models/post');
 
 exports.getPosts = (req, res, next) => {
-    res.status(200).json({
-        posts: [{
-            _id: '111',
-            title: 'First post', 
-            content: 'This is the first post!', 
-            imageUrl: 'images/pato.jpg',
-            creator: {
-                name:'Laaann'
-            },
-            createdAt: new Date()
-        }]
-    });
+    Post.find()
+        .then(posts => {
+            res.status(200).json({message: 'Fetched posts succesfully', posts: posts});
+        })
+        .catch(err => {
+            if(!err.statusCode){
+                //500 = server side error
+                err.statusCode = 500;
+            }
+            next(err);
+        });
 };
 
 exports.postPost = (req, res, next) => {
+    
     //Extracts errors
     const errors = validationResult(req);
     if(!errors.isEmpty()){
+        const error = new Error('Validation failed, entered failes is incorrect.');
         //422 = validation failed
-        return res.status(422).json({
-            message: 'Validation failed, entered failes is incorrect.', 
-            errros: errors
-        });
+        error.statusCode = 422;
+        throw error;
     }
+
+    if(!req.file){
+        const error = new Error('No image provided');
+        error.statusCode = 422;
+        throw error;
+    }
+    const imageUrl = req.file.path.replace("\\" ,"/");
+
     const title = req.body.title;
     const content = req.body.content;
-    //Create post in db
-    //201 = succes creating a resource
-    res.status(201).json({
-        message: 'Post created succesfully!',
-        post: {
-            _id: new Date().toISOString(), 
-            title: title, 
-            content: content, 
-            creator: {name: 'Landeracio'},
-            createdAt: new Date()
-        }
+    const post = new Post({
+        title: title, 
+        content: content, 
+        imageUrl: imageUrl,
+        creator: {name: 'Landeracio'},
     });
+    post.save()
+    .then(result => {
+        console.log(result);
+        //201 = succes creating a resource
+        res.status(201).json({
+            message: 'Post created succesfully!',
+            post: result
+        });
+    })
+    .catch(err => {
+        if(!err.statusCode){
+            //500 = server side error
+            err.statusCode = 500;
+        }
+        next(err);
+    });
+};
+
+exports.getPost = (req, res, next) => {
+    const postId = req.params.postId;
+    Post.findById(postId)
+        .then(post => {
+            if(!post) {
+                const error = new Error('Could not find post');
+                //404 = not found
+                error.status = 404;
+                throw error;
+            }
+            res.status(200).json({message: 'Post fetched', post: post});
+        })
+        .catch(err => {
+            if(!err.statusCode){
+                //500 = server side error
+                err.statusCode = 500;
+            }
+            next(err);
+        })
 }
+
+/*
+updatePost -> imageUrl = req.file.path.replace("\\","/");
+*/
