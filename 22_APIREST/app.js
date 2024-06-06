@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 
 const feedRoutes = require('./routes/feed');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
@@ -52,13 +53,15 @@ app.use((req, res, next) => {
 
 //Forward requests that start with /feed
 app.use('/feed', feedRoutes);
+app.use('/auth', authRoutes);
 
 //Middleware for error hanling
 app.use((error, req, res, next) => {
     console.log(error);
     const status = error.statusCode || 500;
     const message = error.message;
-    res.status(status).json({message: message});
+    const data = error.data;
+    res.status(status).json({message: message, data: data});
 
 })
 
